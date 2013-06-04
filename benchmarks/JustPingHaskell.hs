@@ -7,7 +7,7 @@ import Control.Monad
 import Data.Int
 import Network.Socket
   ( AddrInfoFlag (AI_PASSIVE), HostName, ServiceName, Socket
-  , SocketType (Stream), SocketOption (ReuseAddr)
+  , SocketType (Stream), SocketOption (..)
   , accept, addrAddress, addrFlags, addrFamily, bindSocket, defaultProtocol
   , defaultHints
   , getAddrInfo, listen, setSocketOption, socket, sClose, withSocketsDo )
@@ -40,6 +40,7 @@ main = do
     let serverAddr = head serverAddrs
     sock <- socket (addrFamily serverAddr) Stream defaultProtocol
     setSocketOption sock ReuseAddr 1
+    setSocketOption sock NoDelay 1
     bindSocket sock (addrAddress serverAddr)
 
     putStrLn "server: awaiting client connection"
@@ -60,6 +61,7 @@ main = do
       (Just "8080")
     let serverAddr = head serverAddrs
     sock <- socket (addrFamily serverAddr) Stream defaultProtocol
+    setSocketOption sock NoDelay 1
 
     N.connect sock (addrAddress serverAddr)
 
