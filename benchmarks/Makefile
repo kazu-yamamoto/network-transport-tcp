@@ -7,6 +7,7 @@ INCLUDES=-i${ROOT}/network-transport/src -i${ROOT}/network-transport-tcp/src
 # Enable for profiling
 # PROF_GHC=-prof -fprof-auto
 # PROF_EXE=+RTS -pa -RTS
+PROF_EXE=+RTS -qa -A32m -N3 -RTS
 
 GCC=gcc 
 GHC=ghc -rtsopts -XRankNTypes -XScopedTypeVariables -XDeriveDataTypeable -XCPP -XGeneralizedNewtypeDeriving -optP-include -optPcabal_macros.h
@@ -42,14 +43,20 @@ JustPingC.exe: JustPingC.c
 JustPingHaskellNT.exe: JustPingHaskell.hs
 	$(GHC) -O2 $(PROF_GHC) -o JustPingHaskellNT.exe JustPingHaskell.hs
 
+JustPingHaskell.exe: JustPingHaskell.hs
+	$(GHC) -O2 $(PROF_GHC) -o JustPingHaskell.exe JustPingHaskell.hs -threaded -rtsopts
+
 JustPingTwoSocketPairsND.data: JustPingTwoSocketPairs.exe
 	time ./$< $(NUMPINGS) --NoDelay $(PROF_EXE) 2>$@
 
+JustPingC.data : JustPingC.exe
+	time ./$< $(NUMPINGS) 2>$@
+
+JustPingHaskellNT.data : JustPingHaskellNT.exe
+	time ./$< $(NUMPINGS) 2>$@
+
 %.data : %.exe
 	time ./$< $(NUMPINGS) $(PROF_EXE) 2>$@
-
-%.exe :: %.hs
-	$(GHC) -O2 $(PROF_GHC) -threaded -o $@ --make $< $(INCLUDES)
 
 .PHONY: clean
 clean:
